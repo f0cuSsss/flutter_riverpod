@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/domain/products/product.dart' as p;
+import 'package:flutter_riverpod_demo/domain/products/product.dart' as p;
 
 class Product extends StatelessWidget {
   const Product({

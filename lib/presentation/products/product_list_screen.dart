@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/domain/products/product.dart' as p;
-import 'package:flutter_riverpod/presentation/products/product.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod_demo/application/products/product_providers.dart';
+import 'package:flutter_riverpod_demo/domain/products/product.dart' as p;
+import 'package:flutter_riverpod_demo/infrastructure/products/product.dart';
+import 'package:flutter_riverpod_demo/presentation/products/product.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({Key? key}) : super(key: key);
@@ -10,43 +13,72 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  List<Widget> items = [
-    Product(
-      item: p.Product(
-        title: 'Iphone',
-        description:
-            'Voluptua diam at duo amet sit magna sadipscing ipsum, sit invidunt consetetur voluptua no diam, sed ea amet kasd invidunt.',
-        price: 1250,
-      ),
-    ),
-    Product(
-      item: p.Product(
-        title: 'Macbook',
-        description:
-            'Voluptua diam at duo amet sit magna sadipscing ipsum, sit invidunt consetetur voluptua no diam, sed ea amet kasd invidunt.',
-        price: 1899,
-      ),
-    ),
-    Product(
-      item: p.Product(
-        title: 'Notebook',
-        description:
-            'Voluptua diam at duo amet sit magna sadipscing ipsum, sit invidunt consetetur voluptua no diam, sed ea amet kasd invidunt.',
-        price: 759,
-      ),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (context, index) {
-            return items[index];
-          },
+        child: Column(
+          children: [
+            const Text('Future Provider'),
+            Consumer(
+              builder: (context, T Function<T>(ProviderBase<Object?, T>) watch,
+                  child) {
+                return watch(allProductsProvider).when(
+                  data: (products) {
+                    return Text(products.length.toString());
+                  },
+                  loading: () {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  error: (error, _) {
+                    return Text('Error: $error');
+                  },
+                );
+              },
+            ),
+            const Divider(),
+            Consumer(builder: (context,
+                T Function<T>(ProviderBase<Object?, T>) watch, child) {
+              final value = watch(counterController).toString();
+              return Text('Value: $value');
+            }),
+            ButtonBar(
+              children: [
+                ElevatedButton(
+                  child: const Text('Add'),
+                  onPressed: () {
+                    context.read(counterController.notifier).add();
+                    context.read(counterAsyncController.notifier).add();
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('Substract'),
+                  onPressed: () {
+                    context.read(counterController.notifier).subtract();
+                    context.read(counterAsyncController.notifier).subtract();
+                  },
+                ),
+              ],
+            ),
+            const Divider(),
+            Consumer(
+              builder: (context, T Function<T>(ProviderBase<Object?, T>) watch,
+                  child) {
+                return watch(counterAsyncController).when(
+                  data: (value) {
+                    return Text("AsyncValue: ${value.toString()}");
+                  },
+                  loading: () {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                  error: (error, _) {
+                    return Text('Error: $error');
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
